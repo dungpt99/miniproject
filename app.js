@@ -30,10 +30,6 @@ route(app)
 //Connect database
 db.testConnect()
 
-app.post('/login', (req, res) => {
-    // Your implementation comes here ...
-})
-
 app.listen(process.env.PORT, () => {
     console.log(`App listening at http://localhost:${process.env.PORT}`)
 })

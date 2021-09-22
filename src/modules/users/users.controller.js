@@ -1,4 +1,5 @@
 const users = require('./users.model')
+const schemaValidate = require('./users.validate')
 
 class UserController {
     show(req, res, next) {
@@ -12,22 +13,30 @@ class UserController {
 
     //Save
     save(req, res, next) {
-        try {
-            const { id, name, username, password, email, status } = req.body
-            users
-                .create({
-                    id: id,
-                    name: name,
-                    username: username,
-                    password: password,
-                    email: email,
-                    status: status,
-                })
-                .then(() => console.log('Create user success!'))
-                .catch((err) => console.log(err))
-        } catch (error) {
-            console.log(err)
+        const data = req.body
+        async function saveValue() {
+            try {
+                const value = await schemaValidate.validateAsync(data)
+                const { id, name, username, password, email, status } = value
+                users
+                    .create({
+                        id: id,
+                        name: name,
+                        username: username,
+                        password: password,
+                        email: email,
+                        status: status,
+                    })
+                    .then(() => {
+                        console.log('Create user success!')
+                        res.send(200)
+                    })
+                    .catch((err) => console.log(err))
+            } catch (error) {
+                res.send(error.details[0].message)
+            }
         }
+        saveValue()
     }
 }
 

@@ -1,6 +1,7 @@
 var express = require('express')
 var router = express.Router()
 var userController = require('./users.controller')
+var authenToken = require('../auth/auth.middleware')
 /**
  * @swagger
  * definitions:
@@ -31,11 +32,13 @@ var userController = require('./users.controller')
  *                 type: boolean
  *                 example: 'true'
  *                 required: true
- */
-
-/**
- * @swagger
- *  tags:
+ *components:
+ *      securitySchemes:
+ *          bearerAuth:
+ *              type: http
+ *              scheme: bearer
+ *              bearerFormat: JWT
+ * tags:
  *    name: Users
  *    description: The users managing  API
  */
@@ -46,11 +49,13 @@ var userController = require('./users.controller')
  *   get:
  *      summary: Returns list of users
  *      tags: [Users]
+ *      security:
+ *          - bearerAuth: []
  *      responses:
  *          200:
  *              description: the list of users
  */
-router.get('/', userController.show)
+router.get('/', authenToken, userController.show)
 
 /**
  * @swagger
