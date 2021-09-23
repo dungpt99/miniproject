@@ -41,6 +41,13 @@ var authenToken = require('../auth/auth.middleware')
  * tags:
  *    name: Users
  *    description: The users managing  API
+ * User:
+ *      type: object
+ *      properties:
+ *          user_id:
+ *              type: integer
+ *              description: id of the user
+ *              example: 2
  */
 
 /**
@@ -55,7 +62,28 @@ var authenToken = require('../auth/auth.middleware')
  *          200:
  *              description: the list of users
  */
-router.get('/', authenToken, userController.show)
+router.get('/', userController.show)
+
+/**
+ * @swagger
+ * /users/{user_id}:
+ *      get:
+ *          summary: Get user
+ *          description: Get user
+ *          tags: [Users]
+ *          parameters:
+ *             - in: path
+ *               name: user_id
+ *               schema:
+ *                    type: integer
+ *               required: true
+ *               description: id of the user
+ *               example: 2
+ *          responses:
+ *              200:
+ *                  description: success
+ */
+router.get('/:id', userController.find)
 
 /**
  * @swagger
@@ -75,7 +103,7 @@ router.get('/', authenToken, userController.show)
  *       500:
  *          description: failure in create user
  */
-router.post('/', userController.save)
+router.post('/', userController.create)
 
 /**
  * @swagger
@@ -84,14 +112,25 @@ router.post('/', userController.save)
  *          summary: update user
  *          description: update user
  *          tags: [Users]
+ *          parameters:
+ *              - in: path
+ *                name: id
+ *                schema:
+ *                  type: integer
+ *                required: true
+ *                description: id of the user
+ *                example: 2
+ *          requestBody:
+ *              content:
+ *                  application/json:
+ *                      schema:
+ *                          $ref: '#/definitions/User'
  *          responses:
  *              200:
  *                  description: success
  *
  */
-router.put('/:id', (req, res) => {
-    res.sendStatus(200)
-})
+router.put('/:id', userController.edit)
 
 /**
  * @swagger
@@ -99,12 +138,20 @@ router.put('/:id', (req, res) => {
  *      delete:
  *          summary: delete user
  *          tags: [Users]
+ *          parameters:
+ *              - in: path
+ *                name: id
+ *                schema:
+ *                  type: integer
+ *                required: true
+ *                description: id of the user
+ *                example: 2
  *          responses:
  *              200:
- *                  description:success
+ *                  description: delete user successfully
  */
-router.delete('/:id', (req, res) => {
-    res.sendStatus(200)
-})
+router.delete('/:id', userController.delete)
+
+router.param('id', userController.checkID)
 
 module.exports = router

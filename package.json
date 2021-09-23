@@ -6,7 +6,8 @@
   "scripts": {
     "start": "nodemon app.js",
     "lint": "eslint --ext js src/",
-    "lint:fix": "eslint --fix --ext js src/"
+    "lint:fix": "eslint --fix --ext js src/",
+    "test": "mocha './src/modules/**/*.test.js'"
   },
   "keywords": [],
   "author": "",
@@ -25,7 +26,10 @@
     "swagger-ui-express": "^4.1.6"
   },
   "devDependencies": {
+    "chai": "^4.3.4",
+    "chai-http": "^4.3.0",
     "eslint": "^7.32.0",
+    "mocha": "^9.1.1",
     "nodemon": "^2.0.12"
   }
 }
