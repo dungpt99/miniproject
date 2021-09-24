@@ -18,12 +18,6 @@ class UserController {
         async function findUser() {
             try {
                 const user = await users.findByPk(id)
-                if (user === null) {
-                    return res.status(404).json({
-                        status: 'fail',
-                        message: 'Invalid ID',
-                    })
-                }
                 res.status(200).json({
                     status: 'Success',
                     data: {
@@ -122,13 +116,23 @@ class UserController {
 
     //CheckID
     checkID(req, res, next, val) {
-        if (val > users.length) {
-            return res.status(404).json({
-                status: 'Fail',
-                message: 'Invalid ID',
+        let array = []
+        async function selectId() {
+            const data = await users.findAll({
+                attributes: ['id'],
             })
+
+            data.forEach((e) => array.push(e.dataValues.id))
+
+            if (!array.includes(Number(val))) {
+                return res.status(404).json({
+                    status: 'Fail',
+                    message: 'Invalid ID',
+                })
+            }
+            next()
         }
-        next()
+        selectId()
     }
 }
 
