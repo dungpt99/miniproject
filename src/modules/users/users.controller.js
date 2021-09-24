@@ -1,5 +1,9 @@
 const users = require('./users.model')
 const schemaValidate = require('./users.validate')
+const crypto = require('crypto')
+const bcrypt = require('bcrypt')
+const jwt = require('jsonwebtoken')
+const nodemailer = require('nodemailer')
 
 class UserController {
     // GET
@@ -13,87 +17,132 @@ class UserController {
     }
 
     // GET(by id)
-    find(req, res, next) {
+    async find(req, res, next) {
         const id = req.params.id
-        async function findUser() {
-            try {
-                const user = await users.findByPk(id)
-                res.status(200).json({
-                    status: 'Success',
-                    data: {
-                        user: user,
-                    },
-                })
-            } catch (error) {
-                res.send(error)
-            }
+        try {
+            const user = await users.findByPk(id)
+            res.status(200).json({
+                status: 'Success',
+                data: {
+                    user: user,
+                },
+            })
+        } catch (error) {
+            res.send(error)
         }
-        findUser()
     }
 
     //PUT edit user
-    edit(req, res) {
+    async edit(req, res) {
         const userId = req.params.id
         const data = req.body
-        async function saveValue() {
-            try {
-                const value = await schemaValidate.validateAsync(data)
-                const { id, name, username, password, email, status } = value
-                users
-                    .update(
-                        {
-                            id,
-                            name,
-                            username,
-                            password,
-                            email,
-                            status,
+        try {
+            const value = await schemaValidate.validateAsync(data)
+            const { id, name, username, password, email, status } = value
+            users
+                .update(
+                    {
+                        id,
+                        name,
+                        username,
+                        password,
+                        email,
+                        status,
+                    },
+                    {
+                        where: {
+                            id: userId,
                         },
-                        {
-                            where: {
-                                id: userId,
-                            },
-                        }
-                    )
-                    .then(() => {
-                        res.status(200).json({
-                            status: 'Success',
-                            message: 'Update user successfully',
-                        })
+                    }
+                )
+                .then(() => {
+                    res.status(200).json({
+                        status: 'Success',
+                        message: 'Update user successfully',
                     })
-            } catch (error) {
-                res.status(400).send(error.details[0].message)
-            }
+                })
+        } catch (error) {
+            res.status(400).send(error.details[0].message)
         }
-        saveValue()
     }
 
     // POST
-    create(req, res, next) {
+    async create(req, res, next) {
+        var transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: 'dungpt.ct2@gmail.com',
+                pass: 'Neklmgm123',
+            },
+            tls: {
+                rejectUnauthorized: false,
+            },
+        })
+
         const data = req.body
-        async function saveValue() {
-            try {
-                const value = await schemaValidate.validateAsync(data)
-                const { id, name, username, password, email, status } = value
-                users
-                    .create({
-                        id: id,
-                        name: name,
-                        username: username,
-                        password: password,
-                        email: email,
-                        status: status,
+        try {
+            const value = await schemaValidate.validateAsync(data)
+            const { id, name, username, password, email } = value
+            await users
+                .create({
+                    id: id,
+                    name: name,
+                    username: username,
+                    password: password,
+                    email: email,
+                    emailToken: crypto.randomBytes(64).toString('hex'),
+                    status: false,
+                })
+                .then(async (user) => {
+                    console.log('Create user success!')
+                    const salt = await bcrypt.genSalt(10)
+                    const hashPassword = await bcrypt.hash(user.password, salt)
+                    user.password = hashPassword
+                    await user.save()
+
+                    //Send verification mail to user
+                    var mailOption = {
+                        from: '"Verify your email" <dungpt.ct2@gmail.com>',
+                        to: user.email,
+                        subject: 'DungPT -verify your email',
+                        html: `<h2> ${user.name}! Thanks for your registering on our site </h2>
+                                <h4>Please verify your mail to continue...</h4>
+                                <a href='http://${req.headers.host}/users/verify-email?token=${user.emailToken}'>Verify your email</a>`,
+                    }
+
+                    //Sending mail
+                    transporter.sendMail(mailOption, (err, info) => {
+                        if (err) {
+                            console.log(err)
+                        } else {
+                            console.log('Verfication email is sent your gmail account')
+                        }
                     })
-                    .then((user) => {
-                        console.log('Create user success!')
-                        res.status(200).send(user)
-                    })
-                    .catch((err) => res.send(err))
-            } catch (error) {
-                res.status(400).send(error.details[0].message)
-            }
+                    res.status(200).send(user)
+                })
+                .catch((err) => res.send(err))
+        } catch (error) {
+            res.status(400).send(error)
         }
-        saveValue()
+    }
+
+    //Verify
+    async verify(req, res, next) {
+        try {
+            const token = req.query.token
+            const user = await users.findOne({ where: { emailToken: token } })
+            if (user != null) {
+                user.emailToken = null
+                user.status = true
+                await user.save()
+                res.send(200)
+            } else {
+                res.send('Email is not verified')
+            }
+        } catch (error) {
+            console.log(error)
+            res.send(error)
+        }
     }
 
     //DELETE user

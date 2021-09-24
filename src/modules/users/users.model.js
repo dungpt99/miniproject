@@ -25,6 +25,9 @@ const user = sequelize.define('users', {
         type: DataTypes.STRING,
         allowNull: false,
     },
+    emailToken: {
+        type: DataTypes.STRING,
+    },
     status: {
         type: DataTypes.BOOLEAN,
     },

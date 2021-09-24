@@ -1,30 +1,32 @@
 const jwt = require('jsonwebtoken')
 const refreshtokens = require('./auth.model')
 const users = require('../users/users.model')
+const crypto = require('crypto')
+const bcrypt = require('bcrypt')
+const nodemailer = require('nodemailer')
 
 class AuthController {
     //Login
-    login(req, res, next) {
+    async login(req, res, next) {
         const data = req.body
-        async function user() {
-            const user = await users.findAll({
-                where: {
-                    username: data.username,
-                    password: data.password,
-                },
-            })
-            if (user.length != 0) {
+        const user = await users.findOne({
+            where: {
+                email: data.email,
+            },
+        })
+        if (user.length != 0) {
+            const match = await bcrypt.compare(data.password, user.dataValues.password)
+            if (match) {
                 const accessToken = jwt.sign(data, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '30s' })
                 const refreshToken = jwt.sign(data, process.env.REFRESH_TOKEN_SECRET)
                 refreshtokens.create({
                     id: refreshToken,
                 })
                 res.json({ accessToken, refreshToken })
-            } else {
-                res.send('Login failed.')
             }
+        } else {
+            res.send('Login failed.')
         }
-        user()
     }
 
     //Logout

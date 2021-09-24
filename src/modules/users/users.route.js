@@ -62,8 +62,9 @@ var authenToken = require('../auth/auth.middleware')
  *          200:
  *              description: the list of users
  */
-router.get('/', userController.show)
+router.get('/', authenToken, userController.show)
 
+router.get('/verify-email', userController.verify)
 /**
  * @swagger
  * /users/{user_id}:
