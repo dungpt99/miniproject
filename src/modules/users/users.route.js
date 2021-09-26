@@ -32,6 +32,18 @@ var authenToken = require('../auth/auth.middleware')
  *                 type: boolean
  *                 example: 'true'
  *                 required: true
+ *      resetPassword:
+ *          type: object
+ *          properties:
+ *              password:
+ *                  type: string
+ *                  require: true
+ *              newPassword:
+ *                  type: string
+ *                  require: true
+ *              repeatPassword:
+ *                  type: string
+ *                  require: true
  *components:
  *      securitySchemes:
  *          bearerAuth:
@@ -48,6 +60,9 @@ var authenToken = require('../auth/auth.middleware')
  *              type: integer
  *              description: id of the user
  *              example: 2
+ * 
+
+ *          
  */
 
 /**
@@ -105,6 +120,32 @@ router.get('/:id', userController.find)
  *          description: failure in create user
  */
 router.post('/', userController.create)
+
+/**
+ * @swagger
+ * /users/{id}/resetPassword:
+ *      put:
+ *          summary: update password
+ *          description: update password
+ *          tags: [Users]
+ *          parameters:
+ *              - in: path
+ *                name: id
+ *                schema:
+ *                  type: integer
+ *                required: true
+ *                description: id of the user
+ *                example: 2
+ *          requestBody:
+ *              content:
+ *                  application/json:
+ *                      schema:
+ *                          $ref: '#/definitions/resetPassword'
+ *          responses:
+ *              200:
+ *                  description: success
+ */
+router.put('/:id/resetPassword', userController.editPassword)
 
 /**
  * @swagger

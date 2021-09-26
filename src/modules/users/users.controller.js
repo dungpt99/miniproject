@@ -1,5 +1,5 @@
 const users = require('./users.model')
-const schemaValidate = require('./users.validate')
+const validate = require('./users.validate')
 const crypto = require('crypto')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
@@ -37,7 +37,7 @@ class UserController {
         const userId = req.params.id
         const data = req.body
         try {
-            const value = await schemaValidate.validateAsync(data)
+            const value = await validate.schemaValidate.validateAsync(data)
             const { id, name, username, password, email, status } = value
             users
                 .update(
@@ -66,6 +66,30 @@ class UserController {
         }
     }
 
+    //Edit password
+    async editPassword(req, res) {
+        const userId = req.params.id
+        const data = req.body
+        try {
+            const value = await validate.passwordValidate.validateAsync(data)
+            const user = await users.findByPk(userId)
+            const match = await bcrypt.compare(data.password, user.dataValues.password)
+            if (match) {
+                const { newPassword } = value
+                const salt = await bcrypt.genSalt(10)
+                const hashPassword = await bcrypt.hash(newPassword, salt)
+                user.password = hashPassword
+                await user.save()
+                res.status(200).send(user)
+            } else {
+                res.send('Wrong password')
+            }
+        } catch (error) {
+            console.log(error)
+            res.status(400).send(error.details[0].message)
+        }
+    }
+
     // POST
     async create(req, res, next) {
         var transporter = nodemailer.createTransport({
@@ -81,7 +105,7 @@ class UserController {
 
         const data = req.body
         try {
-            const value = await schemaValidate.validateAsync(data)
+            const value = await validate.schemaValidate.validateAsync(data)
             const { id, name, username, password, email } = value
             await users
                 .create({

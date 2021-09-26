@@ -99,4 +99,7 @@ router.post('/logout', AuthController.logout)
  */
 router.post('/refreshToken', AuthController.refresh)
 
+router.get('/verify-account', AuthController.verifyAccount)
+router.post('/forgotPassword', AuthController.forgotPassword)
+
 module.exports = router
