@@ -1,4 +1,4 @@
-const users = require('./users.model')
+const { users, albums } = require('../models')
 const validate = require('./users.validate')
 const crypto = require('crypto')
 const bcrypt = require('bcrypt')
@@ -7,9 +7,11 @@ const nodemailer = require('nodemailer')
 
 class UserController {
     // GET
-    show(req, res, next) {
+    async show(req, res, next) {
         users
-            .findAll()
+            .findAll({
+                include: albums,
+            })
             .then((users) => {
                 res.json(users)
             })
@@ -38,14 +40,12 @@ class UserController {
         const data = req.body
         try {
             const value = await validate.schemaValidate.validateAsync(data)
-            const { id, name, username, password, email, status } = value
+            const { name, username, email, status } = value
             users
                 .update(
                     {
-                        id,
                         name,
                         username,
-                        password,
                         email,
                         status,
                     },
@@ -106,10 +106,9 @@ class UserController {
         const data = req.body
         try {
             const value = await validate.schemaValidate.validateAsync(data)
-            const { id, name, username, password, email } = value
+            const { name, username, password, email } = value
             await users
                 .create({
-                    id: id,
                     name: name,
                     username: username,
                     password: password,
@@ -197,7 +196,7 @@ class UserController {
 
             data.forEach((e) => array.push(e.dataValues.id))
 
-            if (!array.includes(Number(val))) {
+            if (!array.includes(val)) {
                 return res.status(404).json({
                     status: 'Fail',
                     message: 'Invalid ID',

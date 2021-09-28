@@ -44,6 +44,8 @@ class AuthController {
                         id: refreshToken,
                     })
                     res.json({ accessToken, refreshToken })
+                } else {
+                    res.send('Wrong password')
                 }
             } else {
                 res.send('Your account is not verified')
@@ -78,7 +80,7 @@ class AuthController {
 
         jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, data) => {
             if (err) res.sendStatus(403)
-            const accessToken = jwt.sign({ username: data.username }, process.env.ACCESS_TOKEN_SECRET, {
+            const accessToken = jwt.sign({ email: data.email }, process.env.ACCESS_TOKEN_SECRET, {
                 expiresIn: '30s',
             })
             res.json({ accessToken })

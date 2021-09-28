@@ -8,10 +8,6 @@ var authenToken = require('../auth/auth.middleware')
  *      User:
  *          type: object
  *          properties:
- *              id:
- *                 type: integer
- *                 example: '1'
- *                 required: true
  *              name:
  *                 type: string
  *                 example: 'a'
@@ -28,9 +24,12 @@ var authenToken = require('../auth/auth.middleware')
  *                 type: string
  *                 example: 'a@gmail.com'
  *                 required: true
- *              status:
- *                 type: boolean
- *                 example: 'true'
+ *      editUser:
+ *          type: object
+ *          properties:
+ *              name:
+ *                 type: string
+ *                 example: 'a'
  *                 required: true
  *      resetPassword:
  *          type: object
@@ -91,7 +90,7 @@ router.get('/verify-email', userController.verify)
  *             - in: path
  *               name: user_id
  *               schema:
- *                    type: integer
+ *                    type: string
  *               required: true
  *               description: id of the user
  *               example: 2
@@ -132,7 +131,7 @@ router.post('/', userController.create)
  *              - in: path
  *                name: id
  *                schema:
- *                  type: integer
+ *                  type: string
  *                required: true
  *                description: id of the user
  *                example: 2
@@ -158,7 +157,7 @@ router.put('/:id/resetPassword', userController.editPassword)
  *              - in: path
  *                name: id
  *                schema:
- *                  type: integer
+ *                  type: string
  *                required: true
  *                description: id of the user
  *                example: 2
@@ -166,7 +165,7 @@ router.put('/:id/resetPassword', userController.editPassword)
  *              content:
  *                  application/json:
  *                      schema:
- *                          $ref: '#/definitions/User'
+ *                          $ref: '#/definitions/editUser'
  *          responses:
  *              200:
  *                  description: success
@@ -184,7 +183,7 @@ router.put('/:id', userController.edit)
  *              - in: path
  *                name: id
  *                schema:
- *                  type: integer
+ *                  type: string
  *                required: true
  *                description: id of the user
  *                example: 2

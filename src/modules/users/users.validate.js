@@ -1,8 +1,6 @@
 const Joi = require('joi')
 
 const schemaValidate = Joi.object().keys({
-    id: Joi.number().max(30).required(),
-
     name: Joi.string().min(3).max(30).required(),
 
     username: Joi.string().alphanum().min(3).max(30).required(),
