@@ -1,7 +1,7 @@
 const { sequelize } = require('../../config/db')
 const { DataTypes } = require('sequelize')
 
-const photo = sequelize.define('photo', {
+const photos = sequelize.define('photos', {
     id: {
         type: DataTypes.UUID,
         primaryKey: true,
@@ -11,10 +11,10 @@ const photo = sequelize.define('photo', {
         type: DataTypes.STRING,
         allowNull: false,
     },
-    userid: {
+    userId: {
         type: DataTypes.UUID,
     },
-    albumid: {
+    albumId: {
         type: DataTypes.UUID,
     },
     link: {
@@ -26,4 +26,4 @@ const photo = sequelize.define('photo', {
     },
 })
 
-module.exports = photo
+module.exports = photos

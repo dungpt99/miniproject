@@ -1,4 +1,4 @@
-const { users, albums } = require('../models')
+const { users, albums, photos } = require('../models')
 const schemaValidate = require('./album.validate')
 const jwt = require('jsonwebtoken')
 
@@ -39,17 +39,13 @@ class AlbumController {
 
     //POST
     async create(req, res) {
-        const authorizationHeader = req.headers['authorization']
-        const token = authorizationHeader.split(' ')[1]
-        var decoded = jwt.decode(token, { complete: true })
-        console.log(decoded.payload)
         const data = req.body
         try {
             const value = await schemaValidate.validateAsync(data)
             const { name, description, status } = value
             const user = await users.findOne({
                 where: {
-                    email: decoded.payload.email,
+                    email: req.user.email,
                 },
             })
             await albums
@@ -101,6 +97,39 @@ class AlbumController {
         } catch (error) {
             console.log(error)
             res.send('Delete fail')
+        }
+    }
+
+    //ADD photo
+    async addPhoto(req, res) {
+        const albumId = req.params.id
+        const photoId = req.body.id
+        try {
+            await photos
+                .update(
+                    {
+                        albumId,
+                    },
+                    {
+                        where: {
+                            id: photoId,
+                        },
+                    }
+                )
+                .then((photo) => {
+                    res.status(200).json({
+                        status: 'Success',
+                        data: {
+                            photo,
+                        },
+                    })
+                })
+                .catch((err) => {
+                    console.log(err)
+                    res.send(err)
+                })
+        } catch (error) {
+            res.send(error)
         }
     }
 

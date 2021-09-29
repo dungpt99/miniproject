@@ -59,9 +59,7 @@ var authenToken = require('../auth/auth.middleware')
  *              type: integer
  *              description: id of the user
  *              example: 2
- * 
-
- *          
+ *
  */
 
 /**
@@ -86,6 +84,8 @@ router.get('/verify-email', userController.verify)
  *          summary: Get user
  *          description: Get user
  *          tags: [Users]
+ *          security:
+ *             - bearerAuth: []
  *          parameters:
  *             - in: path
  *               name: user_id
@@ -98,7 +98,7 @@ router.get('/verify-email', userController.verify)
  *              200:
  *                  description: success
  */
-router.get('/:id', userController.find)
+router.get('/:id', authenToken, userController.find)
 
 /**
  * @swagger
@@ -106,7 +106,7 @@ router.get('/:id', userController.find)
  *  post:
  *    summary: Create new user
  *    description: Create new user
- *    tags: [Users]
+ *    tags: [Login]
  *    requestBody:
  *      content:
  *          application/json:
@@ -127,6 +127,8 @@ router.post('/', userController.create)
  *          summary: update password
  *          description: update password
  *          tags: [Users]
+ *          security:
+ *             - bearerAuth: []
  *          parameters:
  *              - in: path
  *                name: id
@@ -144,7 +146,7 @@ router.post('/', userController.create)
  *              200:
  *                  description: success
  */
-router.put('/:id/resetPassword', userController.editPassword)
+router.put('/:id/resetPassword', authenToken, userController.editPassword)
 
 /**
  * @swagger
@@ -153,6 +155,8 @@ router.put('/:id/resetPassword', userController.editPassword)
  *          summary: update user
  *          description: update user
  *          tags: [Users]
+ *          security:
+ *              - bearerAuth: []
  *          parameters:
  *              - in: path
  *                name: id
@@ -171,7 +175,7 @@ router.put('/:id/resetPassword', userController.editPassword)
  *                  description: success
  *
  */
-router.put('/:id', userController.edit)
+router.put('/:id', authenToken, userController.edit)
 
 /**
  * @swagger
@@ -179,6 +183,8 @@ router.put('/:id', userController.edit)
  *      delete:
  *          summary: delete user
  *          tags: [Users]
+ *          security:
+ *              - bearerAuth: []
  *          parameters:
  *              - in: path
  *                name: id
@@ -191,7 +197,7 @@ router.put('/:id', userController.edit)
  *              200:
  *                  description: delete user successfully
  */
-router.delete('/:id', userController.delete)
+router.delete('/:id', authenToken, userController.delete)
 
 router.param('id', userController.checkID)
 

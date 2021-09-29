@@ -24,7 +24,7 @@ class AuthController {
                     refreshtokens.create({
                         id: refreshToken,
                     })
-                    res.json({ accessToken, refreshToken })
+                    res.status(200).json({ accessToken, refreshToken })
                 }
             } else {
                 res.send('Login failed.')
@@ -43,7 +43,7 @@ class AuthController {
                     refreshtokens.create({
                         id: refreshToken,
                     })
-                    res.json({ accessToken, refreshToken })
+                    res.status(200).json({ accessToken, refreshToken })
                 } else {
                     res.send('Wrong password')
                 }

@@ -6,7 +6,25 @@ chai.should()
 
 chai.use(chaiHttp)
 
+let defaultUser = {
+    username: 'user1',
+    password: '123',
+}
+
+let token
+
 describe('Test API user', () => {
+    beforeEach((done) => {
+        chai.request(server)
+            .post('/login')
+            .send(defaultUser)
+            .end((err, res) => {
+                token = res.body.accessToken
+                res.should.have.status(200)
+                done()
+            })
+    })
+
     /**
      * Test the GET router
      */
@@ -14,9 +32,9 @@ describe('Test API user', () => {
         it('It should GET all users', (done) => {
             chai.request(server)
                 .get('/users')
+                .set({ Authorization: `Bearer ${token}` })
                 .end((err, response) => {
                     response.should.have.status(200)
-                    response.body.length.should.be.eq(4)
                     done()
                 })
         })
@@ -24,6 +42,7 @@ describe('Test API user', () => {
         it('It should not GET all users', (done) => {
             chai.request(server)
                 .get('/user')
+                .set({ Authorization: `Bearer ${token}` })
                 .end((err, response) => {
                     response.should.have.status(404)
                     done()
@@ -36,13 +55,18 @@ describe('Test API user', () => {
      */
     describe('GET API /users/:id', () => {
         it('It should GET user', (done) => {
-            const userId = 1
+            const userId = 'c9699f18-f039-437b-a6d9-98dd210a7478'
             chai.request(server)
                 .get('/users/' + userId)
+                .set({ Authorization: `Bearer ${token}` })
                 .end((err, response) => {
                     response.should.have.status(200)
                     response.body.should.be.a('object')
-                    response.body.should.have.property('data').property('user').property('id').eq(1)
+                    response.body.should.have
+                        .property('data')
+                        .property('user')
+                        .property('id')
+                        .eq('c9699f18-f039-437b-a6d9-98dd210a7478')
                     response.body.should.have.property('data').property('user').property('name')
                     response.body.should.have.property('data').property('user').property('username')
                     response.body.should.have.property('data').property('user').property('password')
@@ -59,7 +83,7 @@ describe('Test API user', () => {
                 .end((err, response) => {
                     response.should.have.status(404)
                     response.body.should.be.a('object')
-                    response.body.should.have.property('status').eq('fail')
+                    response.body.should.have.property('status').eq('Fail')
                     response.body.should.have.property('message').eq('Invalid ID')
                     done()
                 })
@@ -96,41 +120,38 @@ describe('Test API user', () => {
     //     })
     // })
 
-    describe('POST API /users', () => {
-        it('It should not POST new user', (done) => {
-            const user = {
-                name: 'user3',
-                username: 'user3',
-                password: '123',
-                email: 'user3@gmail.com',
-                status: true,
-            }
-            chai.request(server)
-                .post('/users')
-                .send(user)
-                .end((err, response) => {
-                    response.should.have.status(400)
-                    done()
-                })
-        })
-    })
+    // describe('POST API /users', () => {
+    //     it('It should not POST new user', (done) => {
+    //         const user = {
+    //             name: 'user3',
+    //             username: 'user3',
+    //             password: '123',
+    //             email: 'user3@gmail.com',
+    //             status: true,
+    //         }
+    //         chai.request(server)
+    //             .post('/users')
+    //             .send(user)
+    //             .end((err, response) => {
+    //                 response.should.have.status(400)
+    //                 done()
+    //             })
+    //     })
+    // })
 
     /**
      * Test the PUT router
      */
     describe('PUT API /users/:id', () => {
         it('It should  PUT  user', (done) => {
-            const userId = 4
+            const userId = 'c9699f18-f039-437b-a6d9-98dd210a7478'
             const user = {
-                id: 4,
-                name: 'user3',
-                username: 'user3',
-                password: '123',
-                email: 'user3@gmail.com',
+                name: 'user1',
                 status: true,
             }
             chai.request(server)
                 .put('/users/' + userId)
+                .set({ Authorization: `Bearer ${token}` })
                 .send(user)
                 .end((err, response) => {
                     response.should.have.status(200)
@@ -144,15 +165,12 @@ describe('Test API user', () => {
         it('It should  PUT  user', (done) => {
             const userId = 4
             const user = {
-                id: 4,
                 name: 'user3',
-                username: 'user3',
-                password: '123',
-                email: 'user3@gmail',
                 status: true,
             }
             chai.request(server)
                 .put('/users/' + userId)
+                .set({ Authorization: `Bearer ${token}` })
                 .send(user)
                 .end((err, response) => {
                     response.should.have.status(400)
@@ -164,18 +182,18 @@ describe('Test API user', () => {
     /**
      * Test the DELETE router
      */
-    describe('DELETE API /users/:id', () => {
-        it('It should  DELETE  user', (done) => {
-            const userId = 4
-            chai.request(server)
-                .delete('/users/' + userId)
-                .end((err, response) => {
-                    response.should.have.status(200)
-                    response.body.should.be.a('object')
-                    response.body.should.have.property('status').eq('Success')
-                    response.body.should.have.property('message').eq('Delete user successfully')
-                    done()
-                })
-        })
-    })
+    // describe('DELETE API /users/:id', () => {
+    //     it('It should  DELETE  user', (done) => {
+    //         const userId = 4
+    //         chai.request(server)
+    //             .delete('/users/' + userId)
+    //             .end((err, response) => {
+    //                 response.should.have.status(200)
+    //                 response.body.should.be.a('object')
+    //                 response.body.should.have.property('status').eq('Success')
+    //                 response.body.should.have.property('message').eq('Delete user successfully')
+    //                 done()
+    //             })
+    //     })
+    // })
 })
